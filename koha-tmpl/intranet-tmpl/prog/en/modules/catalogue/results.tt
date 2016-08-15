@@ -1,4 +1,6 @@
 [% USE Koha %]
+[% USE Biblio %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Catalog &rsaquo; [% IF ( searchdesc ) %]Results of search [% IF ( query_desc ) %]for '[% query_desc | html %]'[% END %][% IF ( limit_desc ) %]&nbsp;with limit(s):&nbsp;'[% limit_desc | html %]'[% END %][% ELSE %]You did not specify any search criteria[% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -14,9 +16,9 @@
 [% END %]
 
 <!--[if lt IE 9]>
-<script type="text/javascript" src="[% interface %]/lib/shims/json2.min.js"></script>
+<script type="text/javascript" src="[% interface %]/lib/shims/json2.min_[% KOHA_VERSION %].js"></script>
 <![endif]-->
-<script type="text/javascript" src="[% interface %]/js/browser.js"></script>
+<script type="text/javascript" src="[% interface %]/js/browser_[% KOHA_VERSION %].js"></script>
 <script type="text/javascript">
 //<![CDATA[
 var MSG_NO_ITEM_SELECTED = _("Nothing is selected.");

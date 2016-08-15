@@ -1,3 +1,5 @@
+[% USE Koha %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
 [% USE ColumnsSettings %]
 
 <script type="text/javascript">

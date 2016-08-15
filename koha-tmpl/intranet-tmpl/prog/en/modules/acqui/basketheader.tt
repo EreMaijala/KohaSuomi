@@ -1,4 +1,5 @@
 [% USE Branches %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Acquisitions &rsaquo;
 [% IF ( add_form ) %]
@@ -8,7 +9,7 @@
 [% END %]
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
-<script type="text/javascript" src="[% interface %]/[% theme %]/js/acq.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/acq_[% KOHA_VERSION %].js"></script>
 </head>
 <body id="acq_basketheader" class="acq">
 [% INCLUDE 'header.inc' %]

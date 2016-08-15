@@ -1,3 +1,5 @@
+[% USE Koha %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
 [% UNLESS ( is_popup ) %]
     [% SET OpacLangSelectorMode = Koha.Preference('OpacLangSelectorMode') %]
     [% IF ( opaccredits ) %]
@@ -77,24 +79,24 @@
 
 
 <!-- JavaScript includes -->
-<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/jquery.js"></script>
-<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/jquery-ui.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/jquery_[% KOHA_VERSION %].js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/jquery-ui_[% KOHA_VERSION %].js"></script>
 <script type="text/javascript">
 // Resolve name collision between jQuery UI and Twitter Bootstrap
 $.widget.bridge('uitooltip', $.ui.tooltip);
 </script>
-<script type="text/javascript" src="[% interface %]/[% theme %]/lib/bootstrap/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="[% interface %]/[% theme %]/js/global.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/lib/bootstrap/js/bootstrap.min_[% KOHA_VERSION %].js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/global_[% KOHA_VERSION %].js"></script>
 <script type="text/javascript">
     Modernizr.load([
         // Test need for polyfill
         {
             test: window.matchMedia,
-            nope: "[% interface %]/[% theme %]/lib/media.match.min.js"
+            nope: "[% interface %]/[% theme %]/lib/media.match.min_[% KOHA_VERSION %].js"
         },
         // and then load enquire
-        "[% interface %]/[% theme %]/lib/enquire.min.js",
-        "[% interface %]/[% theme %]/js/script.js"
+        "[% interface %]/[% theme %]/lib/enquire.min_[% KOHA_VERSION %].js",
+        "[% interface %]/[% theme %]/js/script_[% KOHA_VERSION %].js"
     ]);
 
     // Fix for datepicker in a modal
@@ -105,9 +107,8 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
         var NO_AMAZON_IMAGE = _("No cover image available");
     //]]>
 </script>
-<script type="text/javascript" src="[% interface %]/[% theme %]/js/amazonimages.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/amazonimages_[% KOHA_VERSION %].js"></script>
 [% END %]
-
 <script type="text/javascript">
     //<![CDATA[
     var MSG_CONFIRM_AGAIN = _("Warning: Cannot be undone. Please confirm once again")
@@ -170,16 +171,16 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 </script>
 
 [% IF Koha.Preference( 'opacbookbag' ) == 1 %]
-    <script type="text/javascript" src="[% interface %]/[% theme %]/js/basket.js"></script>
+    <script type="text/javascript" src="[% interface %]/[% theme %]/js/basket_[% KOHA_VERSION %].js"></script>
 [% ELSIF ( Koha.Preference( 'virtualshelves' ) == 1 ) %]
-    <script type="text/javascript" src="[% interface %]/[% theme %]/js/basket.js"></script>
+    <script type="text/javascript" src="[% interface %]/[% theme %]/js/basket_[% KOHA_VERSION %].js"></script>
 [% ELSE %]
     <script type="text/javascript">var readCookie;</script>
 [% END %]
 
-[% IF Koha.Preference( 'opacuserlogin' ) == 1 %][% IF Koha.Preference( 'TagsEnabled' ) == 1 %]<script type="text/javascript" src="[% interface %]/[% theme %]/js/tags.js"></script>[% END %][% ELSE %][% END %]
+[% IF Koha.Preference( 'opacuserlogin' ) == 1 %][% IF Koha.Preference( 'TagsEnabled' ) == 1 %]<script type="text/javascript" src="[% interface %]/[% theme %]/js/tags_[% KOHA_VERSION %].js"></script>[% END %][% ELSE %][% END %]
 [% IF ( GoogleJackets ) %]
-    <script type="text/javascript" src="[% interface %]/[% theme %]/js/google-jackets.js"></script>
+    <script type="text/javascript" src="[% interface %]/[% theme %]/js/google-jackets_[% KOHA_VERSION %].js"></script>
     <script type="text/javascript">
         //<![CDATA[
         var NO_GOOGLE_JACKET = _("No cover image available");
@@ -187,7 +188,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
     </script>
 [% END %]
 [% IF ( Koha.Preference('Coce') && Koha.Preference('CoceProviders') ) %]
-    <script type="text/javascript" src="[% interface %]/[% theme %]/js/coce.js"></script>
+    <script type="text/javascript" src="[% interface %]/[% theme %]/js/coce_[% KOHA_VERSION %].js"></script>
     <script type="text/javascript">
         //<![CDATA[
         var NO_COCE_JACKET = _("No cover image available");
@@ -196,7 +197,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 [% END %]
 
 [% IF OpenLibraryCovers || OpenLibrarySearch %]
-    <script type="text/javascript" src="[% interface %]/[% theme %]/js/openlibrary.js"></script>
+    <script type="text/javascript" src="[% interface %]/[% theme %]/js/openlibrary_[% KOHA_VERSION %].js"></script>
     <script type="text/javascript">
     //<![CDATA[
     var NO_OL_JACKET = _("No cover image available");
@@ -206,7 +207,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 [% END %]
 
 [% IF OPACLocalCoverImages %]
-    <script type="text/javascript" src="[% interface %]/[% theme %]/js/localcovers.js"></script>
+    <script type="text/javascript" src="[% interface %]/[% theme %]/js/localcovers_[% KOHA_VERSION %].js"></script>
     <script type="text/javascript">
     //<![CDATA[
     var NO_LOCAL_JACKET = _("No cover image available");
@@ -215,7 +216,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 [% END %]
 
 [% IF ( BakerTaylorEnabled ) %]
-    <script type="text/javascript" src="[% interface %]/[% theme %]/js/bakertaylorimages.js"></script>
+    <script type="text/javascript" src="[% interface %]/[% theme %]/js/bakertaylorimages_[% KOHA_VERSION %].js"></script>
     <script type="text/javascript">
         //<![CDATA[
         var NO_BAKERTAYLOR_IMAGE = _("No cover image available");
@@ -227,10 +228,10 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
 [% END %]
 [% IF ( GoogleIndicTransliteration ) %]
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript" src="[% interface %]/[% theme %]/js/googleindictransliteration.js"></script>
+    <script type="text/javascript" src="[% interface %]/[% theme %]/js/googleindictransliteration_[% KOHA_VERSION %].js"></script>
 [% END %]
 [% IF persona %]
-    <script src="https://login.persona.org/include.js"></script>
+    <script src="https://login.persona.org/include_[% KOHA_VERSION %].js"></script>
     <script type="text/javascript">
 
     navigator.id.watch({
@@ -267,7 +268,7 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
     </script>
 [% END #  / IF persona %]
 
-<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/plugins/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/plugins/jquery.cookie.min_[% KOHA_VERSION %].js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     if($('#searchsubmit').length) {

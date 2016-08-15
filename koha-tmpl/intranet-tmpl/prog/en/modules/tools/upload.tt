@@ -1,5 +1,6 @@
-[% INCLUDE 'doc-head-open.inc' %]
 [% USE Koha %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
+[% INCLUDE 'doc-head-open.inc' %]
 [% IF plugin %]
     <title>Upload plugin</title>
 [% ELSE %]
@@ -205,7 +206,7 @@
     ];
 //]]>
 </script>
-<script type="text/javascript" src="[% interface %]/[% theme %]/js/file-upload.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/file-upload_[% KOHA_VERSION %].js"></script>
 <script type="text/javascript">
 //<![CDATA[
 function StartUpload() {

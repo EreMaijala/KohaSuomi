@@ -1,5 +1,7 @@
+[% USE Koha %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
 [% #Enable tinymce for system preferences %]
-<script type="text/javascript" src="[% interface %]/lib/tiny_mce/tiny_mce.js"></script>
+<script type="text/javascript" src="[% interface %]/lib/tiny_mce/tiny_mce_[% KOHA_VERSION %].js"></script>
 <script>
 
 [%# Save TinyMCE content and trigger an event on the original element %]
@@ -46,7 +48,7 @@ tinyMCE.init({
     mode : "specific_textareas",
     editor_selector : "mce",
     theme : "advanced",
-    content_css : "[% interface %]/[% theme %]/css/tinymce.css",
+    content_css : "[% interface %]/[% theme %]/css/tinymce_[% KOHA_VERSION %].css",
     plugins : "table,save,advhr,advlink,contextmenu,advimage",
     theme_advanced_buttons1 : "bold,italic,|,cut,copy,paste,|,justifyleft,justifycenter,justifyright,justifyfull,|,formatselect,|,image,link,unlink,anchor,cleanup,help,code,advhr,",
     theme_advanced_buttons2 : "tablecontrols,|,bullist,numlist,|,outdent,indent,|,undo,redo,|,removeformat,|,visualaid,|,sub,sup,|,charmap|,forecolor,backcolor",

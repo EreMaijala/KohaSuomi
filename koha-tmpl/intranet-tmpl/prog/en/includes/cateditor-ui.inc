@@ -1,7 +1,9 @@
-<script src="[% interface %]/lib/codemirror/codemirror-compressed.js"></script>
-<script src="[% interface %]/lib/filesaver.js"></script>
-<script src="[% interface %]/lib/koha/cateditor/marc-mode.js"></script>
-<script src="[% interface %]/lib/require.js"></script>
+[% USE Koha %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
+<script src="[% interface %]/lib/codemirror/codemirror-compressed_[% KOHA_VERSION %].js"></script>
+<script src="[% interface %]/lib/filesaver_[% KOHA_VERSION %].js"></script>
+<script src="[% interface %]/lib/koha/cateditor/marc-mode_[% KOHA_VERSION %].js"></script>
+<script src="[% interface %]/lib/require_[% KOHA_VERSION %].js"></script>
 <script>
 require.config( {
     baseUrl: '[% interface %]/lib/koha/cateditor/',
