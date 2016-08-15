@@ -1,5 +1,6 @@
 [% USE Koha %]
 [% USE Branches %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>[% IF ( LibraryNameTitle ) %][% LibraryNameTitle %][% ELSE %]Koha online[% END %] catalog &rsaquo; Advanced search</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -395,8 +396,8 @@
 [% END %]
 
 [% BLOCK jsinclude %]
-<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/plugins/jquery.deserialize.min.js"></script>
-<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/plugins/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/plugins/jquery.deserialize.min_[% KOHA_VERSION %].js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/plugins/jquery.cookie.min_[% KOHA_VERSION %].js"></script>
 <script type="text/javascript">//<![CDATA[
 $(document).ready(function() {
     $('#advsearches').tabs();

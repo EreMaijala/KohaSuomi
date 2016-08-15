@@ -1,3 +1,5 @@
+[% USE Koha %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
 [% SET intranetstylesheet='staff-global.css' UNLESS intranetstylesheet %]
 [% IF (intranetstylesheet.match('^https?:|^\/')) %]
     <link rel="stylesheet" type="text/css" href="[% intranetstylesheet %]" />

@@ -1,11 +1,13 @@
+[% USE Koha %]
 [% USE KohaDates %]
 [% USE Branches %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Tools &rsaquo; News</title>
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'calendar.inc' %]
 [% IF ( opac_news_count ) %]
-    <link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
+    <link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables_[% KOHA_VERSION %].css" />
     [% INCLUDE 'datatables.inc' %]
     <script type="text/javascript">//<![CDATA[
     $(document).ready(function() {
@@ -45,14 +47,14 @@
     //]]>
     </script>
 [% END %]
-<script type="text/javascript" src="[% interface %]/lib/tiny_mce/tiny_mce.js"></script>
+<script type="text/javascript" src="[% interface %]/lib/tiny_mce/tiny_mce_[% KOHA_VERSION %].js"></script>
 <script type="text/javascript">//<![CDATA[
 tinyMCE.init({
     mode : "textareas",
     theme : "advanced",
     convert_urls : false,
     relative_urls : false,
-    content_css : "[% interface %]/[% theme %]/css/tinymce.css",
+    content_css : "[% interface %]/[% theme %]/css/tinymce_[% KOHA_VERSION %].css",
     plugins : "table,save,advhr,advlink,searchreplace,print,contextmenu",
     theme_advanced_buttons1 : "save,|,bold,italic,|,cut,copy,paste,|,search,replace,|,justifyleft,justifycenter,justifyright,justifyfull,|,formatselect,|,link,unlink,anchor,cleanup,help,code,advhr,|,print",
     theme_advanced_buttons2 : "tablecontrols,|,bullist,numlist,|,outdent,indent,|,undo,redo,|,removeformat,|,visualaid,|,sub,sup,|,charmap",

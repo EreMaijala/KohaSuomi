@@ -1,4 +1,5 @@
 [% USE Koha %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
 [% USE KohaDates %]
 [% USE ItemTypes %]
 [% USE Branches %]
@@ -9,7 +10,7 @@
 <title>Koha &rsaquo; Circulation &rsaquo; Holds queue</title>
 [% INCLUDE 'doc-head-close.inc' %]
 <style type="text/css"> p { margin-top: 0; }</style>
-<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables_[% KOHA_VERSION %].css" />
 [% INCLUDE 'datatables.inc' %]
 [% INCLUDE 'columns_settings.inc' %]
 <script type="text/javascript">//<![CDATA[

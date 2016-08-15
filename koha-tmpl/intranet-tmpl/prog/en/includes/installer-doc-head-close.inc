@@ -2,8 +2,11 @@
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 <style type="text/css" media="screen">
 
+[% USE Koha %]
+[% SET KOHA_VERSION = Koha.Preference('Version') %]
+
 [% IF ( login ) %]
-    @import url([% interface %]/[% theme %]/css/login.css);
+    @import url([% interface %]/[% theme %]/css/login_[% KOHA_VERSION %].css);
 [% END %]
 
 html { background: #eee; }
