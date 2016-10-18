@@ -26,6 +26,10 @@ use Exception::Class (
         isa => 'Koha::Exceptions::Exception',
         description => 'A required parameter is missing'
     },
+    'Koha::Exceptions::UnblessedReference' => {
+        isa => 'Koha::Exceptions::Exception',
+        description => 'Calling unblessed reference'
+    },
     'Koha::Exceptions::UnderMaintenance' => {
         isa => 'Koha::Exceptions::Exception',
         description => 'Koha is under maintenance.'
