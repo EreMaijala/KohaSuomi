@@ -12,6 +12,9 @@ my %excludedPackageRegexps = (
     Ubuntu1604 => [ #Skip packages not present in Ubuntu16.04, install them from CPAN
         'libtemplate-plugin-htmltotext-perl',
         'cron-daemon',
+        'libdbix-runsql-perl',
+        'libpdf-fromhtml-perl',
+        'libhtml-tidy-perl',
     ],
 );
 my %includedPackages = (
@@ -21,6 +24,7 @@ my %includedPackages = (
         'mariadb-common',
         'libdbd-mysql-perl',
         'libcurl4-openssl-dev',
+        'libdevel-size-perl',
     ],
 );
 
