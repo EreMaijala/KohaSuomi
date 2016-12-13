@@ -42,6 +42,16 @@ subtest "Drop package source references (or whatever these 'libtest-simple-perl|
     ok(not($found), "Source references dropped");
 };
 
+subtest "Drop package version specifiers", sub {
+    my $found = 0;
+    foreach my $packName (@$packageNames) {
+        $found = $packName if $packName =~ /\(/i;
+        $found = $packName if $packName =~ /libswagger2-perl\(>=\d.\d+\)/i;
+    }
+    ok(not($found), "Package version specifiers dropped") if not($found);
+    ok(not($found), "Package version specifier not dropped for package '$found'") if $found;
+};
+
 my $ubuntu1604Packages = C4::KohaSuomi::DebianPackages::getUbuntu1604PackageNames();
 subtest "Drop packages not available in Ubuntu16.04", sub {
     foreach my $unwantedPackageName (@{C4::KohaSuomi::DebianPackages::getPackageRegexps('exclude', 'Ubuntu1604')}) {
