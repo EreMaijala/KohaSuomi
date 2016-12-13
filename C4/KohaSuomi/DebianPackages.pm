@@ -55,17 +55,19 @@ sub getUbuntu1604PackageNames {
 
 sub getDebianPackageNames {
     return
-    _dropParentPackageReferences(
-        _dropExcludedPackages(
-            _extractPackageDependencies(
-                _pickNeededPackages(
-                    _splitToPackages(
-                        _slurpControlFile()
-                    ),
-                    qw(koha-perldeps koha-deps),
-                )
-            ),
-            getPackageRegexps('exclude', qw(Standalone)),
+    _dropVersionSpecifiers(
+        _dropParentPackageReferences(
+            _dropExcludedPackages(
+                _extractPackageDependencies(
+                    _pickNeededPackages(
+                        _splitToPackages(
+                            _slurpControlFile()
+                        ),
+                        qw(koha-perldeps koha-deps),
+                    )
+                ),
+                getPackageRegexps('exclude', qw(Standalone)),
+            )
         )
     );
 }
@@ -154,6 +156,32 @@ sub _dropParentPackageReferences {
     foreach my $packName (@$packageNames) {
         #extract libtest-simple-perl|perl-module
         if ($packName =~ /^\s*(.+)\s*(?=\|)/i) {
+            push(@packsAgain, $1);
+        }
+        #extract libtest-deep-perl
+        else {
+            push(@packsAgain, $packName);
+        }
+    }
+    return \@packsAgain;
+}
+
+=head2 _dropVersionSpecifiers
+
+Drop the version specifier:
+    libswagger2-perl(>=0.59)
+to be like this:
+    libswagger2-perl
+
+=cut
+
+sub _dropVersionSpecifiers {
+    my ($packageNames) = @_;
+
+    my @packsAgain;
+    foreach my $packName (@$packageNames) {
+        #extract libswagger2-perl(>=0.59)
+        if ($packName =~ /^\s*(.+)\s*(?=\()/i) {
             push(@packsAgain, $1);
         }
         #extract libtest-deep-perl
