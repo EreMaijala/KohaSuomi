@@ -25,6 +25,7 @@ my %includedPackages = (
         'libdbd-mysql-perl',
         'libcurl4-openssl-dev',
         'libdevel-size-perl',
+        'libhtml-tidy-perl',
     ],
 );
 
