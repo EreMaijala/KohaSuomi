@@ -17,6 +17,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+### BEGIN INIT INFO
+# Provides:          koha-plack-daemon
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Plack server daemon for fast http-handling
+### END INIT INFO
+
 set -e
 
 . /lib/lsb/init-functions
@@ -43,8 +52,9 @@ export PERL_MODULE_DIR="__PERL_MODULE_DIR__"
 export PLACK_DEBUG #This is set if debug-parameter is given or if mode is development
 
 
-#Make sure the pid-dir exists
+#Make sure the pid-dir and log-dir exists
 mkdir -p /var/run/koha
+mkdir -p /var/log/koha
 
 # include helper functions
 if [ -f "$HELPER_FUNCTIONS" ]; then
