@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # koha-sip-watchdog V160504 - Written by Pasi Korkalo/OUTI-Libraries
 # (C) OUTI-libraries, Koha-Suomi Oy
 # License: GPL-3 or newer
@@ -13,20 +13,20 @@ rsyslogKohaConf="/etc/rsyslog.d/koha.conf"
 errorsFound=""
 
 trysip() {
-  ip=$1
-  port=$2
-  user=$3
-  pass=$4
-  branch=$5
+  ip="$1"
+  port="$2"
+  user="$3"
+  pass="$4"
+  branch="$5"
   # Send 93 message to SIP-server
   test -z "$1" || test -z "$2" && return 1
-  SIP_RV=$( echo "9300CN$user|CO$pass|CP$branch|" | $nc -w 5 $ip $port ) #5 second timeout
+  SIP_RV=$( echo "9300CN$user|CO$pass|CP$branch|" | $nc -w 5 "$ip" "$port" ) #5 second timeout
   SIP_RV=$(echo "$SIP_RV" | grep -Po '\d+')
   return 0
 }
 
 checkrunning() {
-  sipname=$1
+  sipname="$1"
   # Find out if the SIP-server is running (listed in process list)
   pgrep -f "SIPServer.pm.*$sipname.xml" > /dev/null 2>&1 && return 0
   return 1
@@ -44,18 +44,18 @@ depsfail() {
 }
 
 getSysLogFile() {
-  facility=$1
+  facility="$1"
   logFile=$(grep -P "$facility" $rsyslogKohaConf | grep -Po '/.+$')
 }
 
 checkLog() {
   # Check if the given log configuration is correct and works as intended
   # Find the last 9300 response log message from this sip server user, extract the timestamp and compare.
-  sipname=$1
-  sipuser=$2
-  logFile=$3
-  logIdent=$4
-  logFacility=$5
+  sipname="$1"
+  sipuser="$2"
+  logFile="$3"
+  logIdent="$4"
+  logFacility="$5"
 
   if [ $logFile == "Sys::Syslog" ]; then
     getSysLogFile $logFacility
@@ -77,23 +77,23 @@ checkLog() {
 }
 
 restart() {
-  sipname=$1
-  serveruser=$2
+  sipname="$1"
+  serveruser="$2"
 
   if test "$1" = "--forcerestart"; then
     # If the restart is forced, we will do stop/start instead of just restart, this
     # will start the server even if it was not running
 
-    sudo /etc/init.d/koha-sip-daemon stop $sipname > /dev/null 2>&1
-    for waitpid in $(seq 5); do checkrunning $sipname && sleep 1 || break; done
+    sudo /etc/init.d/koha-sip-daemon stop "$sipname" > /dev/null 2>&1
+    for waitpid in $(seq 5); do checkrunning "$sipname" && sleep 1 || break; done
 
     if checkrunning $sipname; then
       echo "$(timestamp) $sipname.$serveruser refused to die."
       continue
     fi
 
-    sudo /etc/init.d/koha-sip-daemon start $sipname > /dev/null 2>&1
-    for waitpid in $(seq 5); do checkrunning $sipname && break || sleep 1; done
+    sudo /etc/init.d/koha-sip-daemon start "$sipname" > /dev/null 2>&1
+    for waitpid in $(seq 5); do checkrunning "$sipname" && break || sleep 1; done
 
     echo -n "$(timestamp) $sipname.$serveruser restart "
     checkrunning $sipname && echo "OK." || echo "failed."
@@ -101,10 +101,10 @@ restart() {
   else
     if checkrunning $sipname; then #server is running
       # Without forcerestart we will just do a normal restart
-      sudo /etc/init.d/koha-sip-daemon restart $sipname > /dev/null 2>&1
+      sudo /etc/init.d/koha-sip-daemon restart "$sipname" > /dev/null 2>&1
     else
       #daemon doesnt respond well to restart if the daemon wasn't running in the first place
-      sudo /etc/init.d/koha-sip-daemon start $sipname > /dev/null 2>&1
+      sudo /etc/init.d/koha-sip-daemon start "$sipname" > /dev/null 2>&1
     fi
 
     echo -n "$(timestamp) $sipname.$serveruser restart "
@@ -115,14 +115,14 @@ restart() {
 
 watchdog() {
   # Watchdog does the main aliveness checks against the given server configuration parameters
-  sipname=$1
-  serverip=$2
-  serverport=$3
-  serveruser=$4
-  serverpass=$5
-  serverbrnc=$6
+  sipname="$1"
+  serverip="$2"
+  serverport="$3"
+  serveruser="$4"
+  serverpass="$5"
+  serverbrnc="$6"
 
-  trysip $serverip $serverport $serveruser $serverpass $serverbrnc
+  trysip "$serverip" "$serverport" "$serveruser" "$serverpass" "$serverbrnc"
   #exports $SIP_RV
 
   # Did the server respond with 94, it's ok if the login itself fails, the important
@@ -140,7 +140,7 @@ watchdog() {
     # The server did not respond in time, so restart it
     echo "$(timestamp) $sipname.$serveruser ($serverip:$serverport) - not responding, restarting..."
     errorsFound=1
-    restart $sipname $serveruser
+    restart "$sipname" "$serveruser"
   else
     # The server responded in unexpected fashion
     echo "$(timestamp) $sipname.$serveruser ($serverip:$serverport) - unexpected response $SIP_RV"
@@ -205,8 +205,8 @@ for sipserver in $(ls ${KOHA_CONF%/koha-conf.xml}/SIPconfig/*.xml); do
   for i in `seq 0 $arraySize`
   do
     silentBashXMsg="\n----------------NEW WATCHDOG LOOP-------------------\n"
-    watchdog $sipname $serverip $serverport ${serveruser[$i]} ${serverpass[$i]} ${serverbrnc[$i]}
-    checkLog $sipname ${serveruser[$i]} $logFile $syslogIdent $syslogFacility
+    watchdog "$sipname" "$serverip" "$serverport" "${serveruser[$i]}" "${serverpass[$i]}" "${serverbrnc[$i]}"
+    checkLog "$sipname" "${serveruser[$i]}" "$logFile" "$syslogIdent" "$syslogFacility"
   done
 
 done
