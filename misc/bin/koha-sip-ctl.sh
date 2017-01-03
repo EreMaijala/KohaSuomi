@@ -12,6 +12,7 @@ quotes="\x{22}\x{27}"
 
 ACTION=$1
 SIPDEVICE=$2
+test -z $SIPDEVICE && SIPDEVICE="ALL"
 ACTIVATE_TCPDUMP=$3
 
 USER=koha
@@ -20,10 +21,12 @@ GROUP=koha
 #Need this to make sure the rsyslog has write permissions for the file.
 KOHA_RSYSLOG_CONFIG="/etc/rsyslog.d/koha.conf"
 
-SIPCONFIGDIR="/home/koha/koha-dev/etc/SIPconfig/"
-LOGDIR="/home/koha/koha-dev/var/log/sip2/"
-RUNDIR="/home/koha/koha-dev/var/run/sip2/"
-LOCKDIR="/home/koha/koha-dev/var/lock/sip2/"
+SIPCONFIGDIR="__KOHA_CONF_DIR__/SIPconfig/"
+LOGBASEDIR="__LOG_DIR__"
+LOGDIR="$LOGBASEDIR/sip2/"
+RUNDIR="/var/run/koha/sip2/"
+LOCKDIR="/var/lock/koha/sip2/"
+PERL_MODULE_DIR="__PERL_MODULE_DIR__"
 
 
 
@@ -109,8 +112,17 @@ function operateSIPserverDaemon {
 
     NAME=koha-sip-$SIPDEVICE-daemon
     ERRLOG=$LOGDIR/$SIPDEVICE.err
+    touch $ERRLOG
+    chown $USER:$GROUP $ERRLOG
     STDOUT=$LOGDIR/$SIPDEVICE.std
+    touch $STDOUT
+    chown $USER:$GROUP $STDOUT
     OUTPUT=$LOGDIR/$SIPDEVICE.out
+    touch $OUTPUT
+    chown $USER:$GROUP $OUTPUT
+    LOG4PERL=$LOGBASEDIR/sip2.log
+    touch $LOG4PERL
+    chown $USER:$GROUP $LOG4PERL
 
     #Make sure rsyslog has write permission to the given file/folder
     findSyslogFile $SIPCONFIG #initializes SYSLOG_FILE
@@ -119,11 +131,12 @@ function operateSIPserverDaemon {
     fi
     chown syslog:adm $SYSLOG_FILE
 
+
     . /etc/environment
     export KOHA_CONF PERL5LIB
 
     DAEMON_CALL="daemon --delay=30 --name=$NAME --pidfiles=$RUNDIR --user=$USER --errlog=$ERRLOG --stdout=$STDOUT --output=$OUTPUT --respawn --command=perl "
-    DAEMON_CMD_PARAMS=" -- -I/home/koha/kohaclone/C4/SIP/ -MILS /home/koha/kohaclone/C4/SIP/SIPServer.pm $SIPCONFIG"
+    DAEMON_CMD_PARAMS=" -- -I$PERL_MODULE_DIR/C4/SIP/ -MILS $PERL_MODULE_DIR/C4/SIP/SIPServer.pm $SIPCONFIG"
 
     case "$ACTION" in
     start)
