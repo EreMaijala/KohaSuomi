@@ -33,8 +33,10 @@ set -e
 
 HELPER_FUNCTIONS="__PERL_MODULE_DIR__/debian/scripts/koha-functions.sh"
 
-PIDFILE="/var/run/koha/plack.pid"
-PLACKSOCKET="/var/run/koha/plack.sock"
+RUNDIR="/var/run/koha"
+LOGDIR="__LOG_DIR__"
+PIDFILE="$RUNDIR/plack.pid"
+PLACKSOCKET="$RUNDIR/plack.sock"
 PSGIFILE="__PERL_MODULE_DIR__/misc/plack/plack.psgi"
 MODE="deployment" #development|deployment|test
 LISTEN=":5000"
@@ -53,8 +55,8 @@ export PLACK_DEBUG #This is set if debug-parameter is given or if mode is develo
 
 
 #Make sure the pid-dir and log-dir exists
-mkdir -p /var/run/koha
-mkdir -p /var/log/koha
+mkdir -p $RUNDIR
+mkdir -p $LOGDIR
 
 # include helper functions
 if [ -f "$HELPER_FUNCTIONS" ]; then
@@ -105,8 +107,8 @@ start_plack()
     test "$MODE" == "deployment" && STARMANOPTS="$STARMANOPTS --daemonize \
                                                               --max-requests 50 \
                                                               --workers 2 \
-                                                              --access-log /var/log/koha/plack.log \
-                                                              --error-log /var/log/koha/plack-error.log \
+                                                              --access-log $LOGDIR/plack.log \
+                                                              --error-log $LOGDIR/plack-error.log \
                                                 "
 
     test -n "$PLACKSOCKET" && STARMANOPTS="$STARMANOPTS --listen ${PLACKSOCKET} "
