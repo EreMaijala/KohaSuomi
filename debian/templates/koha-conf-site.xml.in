@@ -311,5 +311,12 @@ __END_SRU_PUBLICSERVER__
     <font type="HBO">/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-BoldOblique.ttf</font>
  </ttf>
 
+<!--
+ <elasticsearch>
+     <server>localhost:9200</server>      <!-- may be repeated to include all servers on your cluster -->
+     <index_name>koha</index_name>  <!-- should be unique amongst all the indices on your cluster. _biblios and _authorities will be appended. -->
+ </elasticsearch>
+-->
+
 </config>
 </yazgfs>
