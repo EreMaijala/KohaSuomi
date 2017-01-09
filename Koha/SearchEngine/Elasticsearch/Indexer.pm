@@ -24,7 +24,7 @@ use Data::Dumper;
 
 # For now just marc, but we can do anything here really
 use Catmandu::Importer::MARC;
-use Catmandu::Store::Elasticsearch;
+use Catmandu::Store::ElasticSearch;
 
 Koha::SearchEngine::Elasticsearch::Indexer->mk_accessors(qw( store ));
 
@@ -77,6 +77,7 @@ sub update_index {
             )
         );
     }
+    my $array_ref = $from->to_array;
     $self->store->bag->add_many($from);
     $self->store->bag->commit;
     return 1;
