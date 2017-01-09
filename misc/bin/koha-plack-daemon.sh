@@ -102,7 +102,7 @@ start_plack()
     _check_and_fix_perms
 
     DEBUGGER_STR=""
-    test "$DEBUGGER" == "1" && $DEBUGGER_STR="/usr/bin/perl -d "
+    test "$DEBUGGER" == "1" && DEBUGGER_STR="/usr/bin/perl -d "
 
     STARMANOPTS="-M FindBin \
                  --user=$USER --group=$GROUP \
