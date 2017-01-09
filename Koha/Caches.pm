@@ -35,4 +35,9 @@ sub flush_L1_caches {
     }
 }
 
+sub flushAllCaches {
+    my $conf_cache = Koha::Caches->get_instance('config');
+    $conf_cache->flush_all() if $conf_cache;
+}
+
 1;
