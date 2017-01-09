@@ -76,7 +76,7 @@ $scriptname
 This script lets you manage the plack daemon for your Koha instance.
 
 Usage:
-$scriptname start|stop|restart|reload [debug]
+$scriptname start|stop|restart|reload [development|deployement|test] [debug] [debugger]
 $scriptname -h|--help
 
     start               Start the plack daemon for the specified instances
@@ -84,10 +84,15 @@ $scriptname -h|--help
     restart             Restart the plack daemon for the specified instances
     reload              Reload the application without losing connections
     debug               Trigger PLACK_DEBUG -environment variable
+    debugger            Start perl with the -d -flag
     deployment          Set the plack mode
     development         Set the plack mode
     test                Set the plack mode
     --help|-h           Display this help message
+
+EXAMPLE
+
+bash -x /etc/init.d/koha-plack-daemon start development debug debugger
 
 EOF
 }
@@ -95,6 +100,9 @@ EOF
 start_plack()
 {
     _check_and_fix_perms
+
+    DEBUGGER_STR=""
+    test "$DEBUGGER" == "1" && $DEBUGGER_STR="/usr/bin/perl -d "
 
     STARMANOPTS="-M FindBin \
                  --user=$USER --group=$GROUP \
@@ -120,7 +128,7 @@ start_plack()
     if ! is_plack_running; then
         log_daemon_msg "Starting Plack daemon"
 
-        if ${STARMAN} ${STARMANOPTS}; then
+        if ${DEBUGGER_STR} ${STARMAN} ${STARMANOPTS}; then
             log_end_msg 0
         else
             log_end_msg 1
@@ -262,6 +270,9 @@ while [ $# -gt 0 ]; do
             shift ;;
         debug)
             export PLACK_DEBUG=1
+            shift ;;
+        debugger)
+            DEBUGGER="1"
             shift ;;
         deployment)
             MODE="deployment"
