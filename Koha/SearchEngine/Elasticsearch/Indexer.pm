@@ -24,7 +24,7 @@ use Data::Dumper;
 
 # For now just marc, but we can do anything here really
 use Catmandu::Importer::MARC;
-use Catmandu::Store::ElasticSearch;
+use Catmandu::Store::Elasticsearch;
 
 Koha::SearchEngine::Elasticsearch::Indexer->mk_accessors(qw( store ));
 
