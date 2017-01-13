@@ -375,6 +375,12 @@ Koha from a git clone with no fuss).
 Directory under which most components will go.  Default
 value will vary depending on INSTALL_MODE.
 
+=item WEBSERVER_IP
+
+ip where the webserver listens for connections
+Defaults to 127.0.1.1
+Use * to listen for any ip
+
 =item DB_TYPE
 
 Type of DBMS (e.g., mysql or Pg).
@@ -902,6 +908,15 @@ PostgreSQL support is highly experimental.
 DBMS to use);
     $msg .= _add_valid_values_disp('DB_TYPE', $valid_values);
     $config{'DB_TYPE'} = _get_value('DB_TYPE', $msg, $defaults->{'DB_TYPE'}, $valid_values, $install_log_values);
+
+    $msg = q(
+Please specify the webserver ip you want to receive requests into?
+Leave empty for default 127.0.1.1
+
+Eg. 192.168.10.100, or whatever is the ip of your server
+Use * to accept connections to any ip.
+);
+    $config{'WEBSERVER_IP'} = _get_value('WEBSERVER_IP', $msg, $defaults->{'WEBSERVER_IP'}, $valid_values, $install_log_values);
 
     $msg = q(
 Please specify the name or address of your
