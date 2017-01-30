@@ -169,6 +169,11 @@ our $PERL_DEPS = {
         'required' => '1',
         'min_ver'  => '2.56'
     },
+    'TAP::Harness::JUnit' => {
+        'usage'    => 'Core',
+        'required' => '1',
+        'min_ver'  => '0.42',
+    },
     'PDF::API2::Util' => {
         'usage'    => 'Core',
         'required' => '1',
@@ -756,6 +761,11 @@ our $PERL_DEPS = {
         'usage'    => 'Test code coverage',
         'required' => '0',
         'min_ver'  => '0.89',
+    },
+    'Devel::Cover::Report::Clover' => {
+        'usage'    => 'Test code coverage',
+        'required' => '1',
+        'min_ver'  => '1.01',
     },
     'Log::Log4perl' => {
         'usage'    => 'Core',
