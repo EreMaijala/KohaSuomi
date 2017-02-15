@@ -200,6 +200,7 @@ CREATE TABLE `biblioitems` ( -- information related to bibliographic records in 
   KEY `isbn` (`isbn`(255)),
   KEY `issn` (`issn`(255)),
   KEY `publishercode` (`publishercode`),
+  KEY `timestamp` (`timestamp`),
   CONSTRAINT `biblioitems_ibfk_1` FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -551,7 +552,8 @@ CREATE TABLE `deletedbiblioitems` ( -- information about bibliographic records t
   KEY `bibnoidx` (`biblionumber`),
   KEY `itemtype_idx` (`itemtype`),
   KEY `isbn` (`isbn`(255)),
-  KEY `publishercode` (`publishercode`)
+  KEY `publishercode` (`publishercode`),
+  KEY `timestamp` (`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -693,7 +695,8 @@ CREATE TABLE `deleteditems` (
   KEY `delitembibnoidx` (`biblionumber`),
   KEY `delhomebranch` (`homebranch`),
   KEY `delholdingbranch` (`holdingbranch`),
-  KEY `itype_idx` (`itype`)
+  KEY `itype_idx` (`itype`),
+  KEY `timestamp` (`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -898,7 +901,7 @@ CREATE TABLE `refund_lost_item_fee_rules` ( -- refund lost item fee rules tbale
 --
 
 DROP TABLE IF EXISTS `items`;
-CREATE TABLE `items` ( -- holdings/item information 
+CREATE TABLE `items` ( -- holdings/item information
   `itemnumber` int(11) NOT NULL auto_increment, -- primary key and unique identifier added by Koha
   `biblionumber` int(11) NOT NULL default 0, -- foreign key from biblio table used to link this item to the right bib record
   `biblioitemnumber` int(11) NOT NULL default 0, -- foreign key from the biblioitems table to link to item to additional information
@@ -954,6 +957,7 @@ CREATE TABLE `items` ( -- holdings/item information
   KEY `items_location` (`location`),
   KEY `items_ccode` (`ccode`),
   KEY `itype_idx` (`itype`),
+  KEY `timestamp` (`timestamp`),
   CONSTRAINT `items_ibfk_1` FOREIGN KEY (`biblioitemnumber`) REFERENCES `biblioitems` (`biblioitemnumber`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `items_ibfk_2` FOREIGN KEY (`homebranch`) REFERENCES `branches` (`branchcode`) ON UPDATE CASCADE,
   CONSTRAINT `items_ibfk_3` FOREIGN KEY (`holdingbranch`) REFERENCES `branches` (`branchcode`) ON UPDATE CASCADE,
@@ -2239,7 +2243,7 @@ CREATE TABLE `userflags` (
 --
 
 DROP TABLE IF EXISTS `virtualshelves`;
-CREATE TABLE `virtualshelves` ( -- information about lists (or virtual shelves) 
+CREATE TABLE `virtualshelves` ( -- information about lists (or virtual shelves)
   `shelfnumber` int(11) NOT NULL auto_increment, -- unique identifier assigned by Koha
   `shelfname` varchar(255) default NULL, -- name of the list
   `owner` int default NULL, -- foreign key linking to the borrowers table (using borrowernumber) for the creator of this list (changed from varchar(80) to int)
@@ -2434,12 +2438,12 @@ CREATE TABLE `permissions` (
 
 DROP TABLE IF EXISTS `serialitems`;
 CREATE TABLE `serialitems` (
-	`itemnumber` int(11) NOT NULL,
-	`serialid` int(11) NOT NULL,
-	UNIQUE KEY `serialitemsidx` (`itemnumber`),
-	KEY `serialitems_sfk_1` (`serialid`),
-	CONSTRAINT `serialitems_sfk_1` FOREIGN KEY (`serialid`) REFERENCES `serial` (`serialid`) ON DELETE CASCADE ON UPDATE CASCADE,
-	CONSTRAINT `serialitems_sfk_2` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE CASCADE ON UPDATE CASCADE
+  `itemnumber` int(11) NOT NULL,
+  `serialid` int(11) NOT NULL,
+  UNIQUE KEY `serialitemsidx` (`itemnumber`),
+  KEY `serialitems_sfk_1` (`serialid`),
+  CONSTRAINT `serialitems_sfk_1` FOREIGN KEY (`serialid`) REFERENCES `serial` (`serialid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `serialitems_sfk_2` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
