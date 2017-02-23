@@ -867,6 +867,11 @@ our $PERL_DEPS = {
         required => 1,
         min_ver => '0.058',
     },
+    'Exception::Class' => {
+        'usage'    => 'Core',
+        'required' => '1.39',
+        'min_ver'  => '1.39'
+    },
 };
 
 1;
