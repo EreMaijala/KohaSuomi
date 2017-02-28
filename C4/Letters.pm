@@ -1406,12 +1406,48 @@ sub _send_message_by_sms {
         return;
     }
 
-    my $success = C4::SMS->send_sms( { destination => $member->{'smsalertnumber'},
-                                       message     => $message->{'content'},
-                                     } );
-    _set_message_status( { message_id => $message->{'message_id'},
-                           status     => ($success ? 'sent' : 'failed') } );
-    return $success;
+    my $success;
+    try {
+        $success = C4::SMS->send_sms( { destination => $member->{'smsalertnumber'},
+                                           message     => $message->{'content'},
+                                           message_id  => $message->{'message_id'},
+                                           from_address => $message->{'from_address'},
+                                         } );
+        _set_message_status( { message_id => $message->{'message_id'},
+                               status     => ($success ? 'sent' : 'failed'),
+                               delivery_note => ($success ? '' : 'No notes from SMS driver') } );
+
+    } catch {
+        if (blessed($_)){
+            if ($_->isa('Koha::Exception::ConnectionFailed')){
+                # Keep the message in pending status but
+                # add a delivery note explaining what happened
+                _set_message_status ( { message_id => $message->{'message_id'},
+                                        status     => 'pending',
+                                        delivery_note => 'Connection failed. Attempting to resend.' } );
+            }
+            elsif ($_->isa('Koha::Exception::SMSDeliveryFailure')){
+                # SMS delivery was unsuccessful. Set message to failed and give a delivery note
+                _set_message_status ( { message_id => $message->{'message_id'},
+                                        status     => 'failed',
+                                        delivery_note => $_->error } );
+            }
+            else {
+                # failsafe: if we catch and unknown exception, set message status to failed
+                _set_message_status( { message_id => $message->{'message_id'},
+                               status     => 'failed',
+                               delivery_note => 'Unknown exception.' } );
+                $_->rethrow();
+            }
+        }
+        else {
+            # failsafe
+            _set_message_status( { message_id => $message->{'message_id'},
+                               status     => 'failed',
+                               delivery_note => 'Unknown non-blessed exception.' } );
+            die $_;
+        }
+    };
 }
 
 sub _update_message_to_address {
