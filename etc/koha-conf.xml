@@ -197,5 +197,14 @@ __PAZPAR2_TOGGLE_XML_POST__
     </arena>
  </smsProviders>
 
+ <!-- Opuscapita iPost configuration -->
+ <printmailProviders>
+    <opusFTP>
+      <ftpHost></ftpHost>
+      <ftpUser></ftpUser>
+      <ftpPass></ftpPass>
+    </opusFTP>
+ </printmailProviders>
+
 </config>
 </yazgfs>
