@@ -797,6 +797,11 @@ our $PERL_DEPS = {
         'required' => '0',
         'min_ver'  => '1.10',
     },
+    'MojoX::Log::Log4perl' => {
+        'usage'    => 'Logs',
+        'required' => '0',
+        'min_ver'  => '0.11',
+    },
     'UNIVERSAL::can' => {
         'usage'    => 'SIP',
         'required' => '1',
