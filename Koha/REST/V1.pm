@@ -65,17 +65,17 @@ sub startup {
                                 # Paths-, Parameters-, Definitions- & Info-object
                                 # is not allowed by the OpenAPI specification.
     });
+
+    push @{$self->app->static->paths}, '/home/koha/Koha/';
     $self->routes->get('/api/v1/doc' => sub {
-        push @{$_[0]->app->static->paths}, '/home/koha/Koha/';
         if ($_[0]->req->url->path->to_string eq 'api/v1/doc') {
             $_[0]->res->headers->location('/api/v1/doc/');
             return $_[0]->render(status => 301, text => '');
         }
-        return $_[0]->reply->static('api/v1/doc/index.html');
+        return $_[0]->reply->static('api/v1/swagger-ui/dist/index.html');
     });
     $self->routes->get('/api/v1/doc/*path' => sub {
-        push @{$_[0]->app->static->paths}, '/home/koha/Koha/';
-        return $_[0]->reply->static('api/v1/doc/'.$_[0]->stash->{path});
+        return $_[0]->reply->static('api/v1/swagger-ui/dist/'.$_[0]->stash->{path});
     });
 }
 
