@@ -37,12 +37,7 @@ BEGIN {
 
 use_ok('Koha::Calendar');
 
-use Test::DBIx::Class {
-    schema_class => 'Koha::Schema',
-    connect_info => ['dbi:SQLite:dbname=:memory:','',''],
-    connect_opts => { name_sep => '.', quote_char => '`', },
-    fixture_class => '::Populate',
-};
+use Test::DBIx::Class;
 
 my $db = Test::MockModule->new('Koha::Database');
 $db->mock(
