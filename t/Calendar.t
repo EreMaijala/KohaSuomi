@@ -42,17 +42,7 @@ use Test::DBIx::Class {
     connect_info => ['dbi:SQLite:dbname=:memory:','',''],
     connect_opts => { name_sep => '.', quote_char => '`', },
     fixture_class => '::Populate',
-}, 'Biblio' ;
-
-sub fixtures {
-    my ( $data ) = @_;
-    fixtures_ok [
-        Biblio => [
-            [ qw/ biblionumber datecreated timestamp  / ],
-            @$data,
-        ],
-    ], 'add fixtures';
-}
+};
 
 my $db = Test::MockModule->new('Koha::Database');
 $db->mock(
