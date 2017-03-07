@@ -696,6 +696,10 @@ Circulation:
               choices:
                   always: "any time a hold is placed."
                   not_always: "only if all items are checked out and the record has at least one hold already."
+        -
+            - Choose which fines will be removed on item return. Set here the note of the fine, separated by | eg. Perintä|Muovitusmaksu
+            - pref: RemoveFineOnReturn
+              class: Choice
     Self Checkout:
         -
             - "Include the following JavaScript on all pages in the web-based self checkout:"

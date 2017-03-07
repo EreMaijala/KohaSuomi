@@ -27,7 +27,7 @@
 //]]>
 </script>
 <style type="text/css">
-    p.notice { display: none; }
+    div.notice { display: none; }
     a.notice-title { font-weight: bold; display: block; }
 </style>
 </head>
