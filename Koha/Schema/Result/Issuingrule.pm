@@ -23,6 +23,12 @@ __PACKAGE__->table("issuingrules");
 
 =head1 ACCESSORS
 
+=head2 issuingrules_id
+
+  data_type: 'integer'
+  is_auto_increment: 1
+  is_nullable: 0
+
 =head2 categorycode
 
   data_type: 'varchar'
@@ -212,6 +218,8 @@ __PACKAGE__->table("issuingrules");
 =cut
 
 __PACKAGE__->add_columns(
+  "issuingrules_id",
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "categorycode",
   { data_type => "varchar", default_value => "", is_nullable => 0, size => 10 },
   "itemtype",
@@ -292,6 +300,20 @@ __PACKAGE__->add_columns(
 
 =over 4
 
+=item * L</issuingrules_id>
+
+=back
+
+=cut
+
+__PACKAGE__->set_primary_key("issuingrules_id");
+
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<issuingrules_selects>
+
+=over 4
+
 =item * L</branchcode>
 
 =item * L</categorycode>
@@ -302,11 +324,14 @@ __PACKAGE__->add_columns(
 
 =cut
 
-__PACKAGE__->set_primary_key("branchcode", "categorycode", "itemtype");
+__PACKAGE__->add_unique_constraint(
+  "issuingrules_selects",
+  ["branchcode", "categorycode", "itemtype"],
+);
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-11-02 10:33:37
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:t9AhZLbm4SE7mx25LAyhGA
+# Created by DBIx::Class::Schema::Loader v0.07045 @ 2017-03-08 15:49:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:714V5KtlVyeDUidAdc2m/g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
