@@ -130,7 +130,7 @@ __PACKAGE__->table("branches");
 
 =head2 pickup_location
 
-  data_type: 'integer'
+  data_type: 'tinyint'
   default_value: 1
   is_nullable: 0
 
@@ -178,7 +178,7 @@ __PACKAGE__->add_columns(
   "opac_info",
   { data_type => "text", is_nullable => 1 },
   "pickup_location",
-  { data_type => "integer", default_value => 1, is_nullable => 0 },
+  { data_type => "tinyint", default_value => 1, is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY

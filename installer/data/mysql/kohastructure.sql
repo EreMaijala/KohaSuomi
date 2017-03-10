@@ -278,6 +278,7 @@ CREATE TABLE `branches` ( -- information about your libraries or branches are st
   `branchprinter` varchar(100) default NULL, -- unused in Koha
   `branchnotes` mediumtext, -- notes related to your library or branch
   opac_info text, -- HTML that displays in OPAC
+  `pickup_location` tinyint(1) not null default 1, -- can library act as a pickup location
   PRIMARY KEY (`branchcode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
