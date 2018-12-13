@@ -2787,23 +2787,24 @@ sub CanBookBeRenewed {
         }
         else {
 
-            # Get all other items that could possibly fill reserves
-            my @itemnumbers = $schema->resultset('Item')->search(
-                {
-                    biblionumber => $resrec->{biblionumber},
-                    onloan       => undef,
-                    notforloan   => 0,
-                    -not         => { itemnumber => $itemnumber }
-                },
-                { columns => 'itemnumber' }
-            )->get_column('itemnumber')->all();
+            # Get number of other items that could possibly fill reserves
+            # Using raw SQL here since this is critical for good performance
+            my $item_sql = qq{
+                FROM items WHERE biblionumber=? AND onloan IS NULL AND notforloan = 0 AND itemnumber != ? 
+                AND NOT EXISTS (SELECT r.itemnumber FROM reserves r WHERE r.itemnumber = items.itemnumber AND r.found IS NOT NULL)
+            };
+            my $sth = $dbh->prepare("SELECT count(*) $item_sql");
+            $sth->execute($resrec->{biblionumber}, $itemnumber);
+            my ($item_count) = $sth->fetchrow_array();
+            $sth->finish();
 
-            my $size = @itemnumbers;
+            return ( 0, "on_reserve" ) if ($item_count == 0);
+
             # Get all other reserves that could have been filled by this item
             my @borrowernumbers;
             while (1) {
                 my ( $reserve_found, $reserve, undef ) =
-                  C4::Reserves::CheckReserves( $itemnumber, undef, undef, $size+1, \@borrowernumbers );
+                  C4::Reserves::CheckReserves( $itemnumber, undef, undef, $item_count+1, \@borrowernumbers );
                   
                 if ($reserve_found) {
                     push( @borrowernumbers, $reserve->{borrowernumber} );
@@ -2819,15 +2820,17 @@ sub CanBookBeRenewed {
             # by pushing all the elements onto an array and removing the duplicates.
             my @reservable;
             my %borrowers;
-            ITEM: foreach my $i (@itemnumbers) {
-                my $item = GetItem($i);
-                next if IsItemOnHoldAndFound($i);
+            my $biblioData = C4::Biblio::GetBiblioData( $item->{biblionumber} );
+            # Using raw SQL here since this is critical for good performance
+            $sth = $dbh->prepare("SELECT * $item_sql");
+            $sth->execute();
+            ITEM: while (my $other_item = $sth->fetchrow_hashref()) {
                 for my $b (@borrowernumbers) {
                     my $borr = $borrowers{$b}//= C4::Members::GetMember(borrowernumber => $b);
-                    next unless IsAvailableForItemLevelRequest($item, $borr);
-                    next unless CanItemBeReserved($b,$i);
+                    next unless IsAvailableForItemLevelRequest($other_item, $borr);
+                    next unless CanItemBeReserved($borr, $other_item, undef, $biblioData);
 
-                    push @reservable, $i;
+                    push @reservable, $other_item->{'itemnumber'};
                     if (@reservable >= @borrowernumbers) {
                         $resfound = 0;
                         last ITEM;

@@ -310,8 +310,11 @@ sub CanBookBeReserved{
 
 =head2 CanItemBeReserved
 
-  $canReserve = &CanItemBeReserved($borrowernumber, $itemnumber, $branchcode)
+  $canReserve = &CanItemBeReserved($borrower, $item, $branchcode)
   if ($canReserve eq 'OK') { #We can reserve this Item! }
+
+    $borrower can be either borrowernumber or hashref
+    $item can be either itemnumber or hashref
 
 @RETURNS OK,              if the Item can be reserved.
          ageRestricted,   if the Item is age restricted for this borrower.
@@ -326,23 +329,39 @@ sub CanBookBeReserved{
 =cut
 
 sub CanItemBeReserved {
-    my ( $borrowernumber, $itemnumber, $branchcode_to ) = @_;
+    my ( $borrower, $item, $branchcode_to, $biblioData ) = @_;
 
     my $dbh = C4::Context->dbh;
     my $ruleitemtype;    # itemtype of the matching issuing rule
     my $allowedreserves  = 0; # Total number of holds allowed across all records
     my $holds_per_record = 1; # Total number of holds allowed for this one given record
 
-    # we retrieve borrowers and items informations #
-    # item->{itype} will come for biblioitems if necessery
-    my $item       = GetItem($itemnumber);
-    my $biblioData = C4::Biblio::GetBiblioData( $item->{biblionumber} );
-    my $borrower   = C4::Members::GetMember( 'borrowernumber' => $borrowernumber );
+    # we retrieve borrower's and item's information
+    # item->{itype} will come from biblioitems if necessary
+    if (ref($item) ne 'HASH') {
+        $item = GetItem($item);
+    }
+    my $itemnumber = $item->{'itemnumber'};
+    if (ref($borrower) ne 'HASH') {
+        $borrower = C4::Members::GetMember( 'borrowernumber' => $borrower );
+    }
+    my $borrowernumber = $borrower->{'borrowernumber'};
+    $biblioData = C4::Biblio::GetBiblioData( $item->{biblionumber} ) unless defined $biblioData;
 
     # If an item is damaged and we don't allow holds on damaged items, we can stop right here
     return 'damaged'
       if ( $item->{damaged}
         && !C4::Context->preference('AllowHoldsOnDamagedItems') );
+
+    # Check item branch if IndependentBranches is ON and canreservefromotherbranches is OFF
+    if ( C4::Context->preference('IndependentBranches')
+        and !C4::Context->preference('canreservefromotherbranches') )
+    {
+        my $itembranch = $item->{'homebranch'};
+        if ( $itembranch ne $borrower->{branchcode} ) {
+            return 'cannotReserveFromOtherBranches';
+        }
+    }
 
     # Check for the age restriction
     my ( $ageRestriction, $daysToAgeRestriction ) =
@@ -389,11 +408,10 @@ sub CanItemBeReserved {
         $ruleitemtype = '*';
     }
 
-    $item = Koha::Items->find( $itemnumber );
     my $holds = Koha::Holds->search(
         {
             borrowernumber => $borrowernumber,
-            biblionumber   => $item->biblionumber,
+            biblionumber   => $item->{'biblionumber'},
             found          => undef, # Found holds don't count against a patron's holds limit
         }
     );
@@ -433,29 +451,18 @@ sub CanItemBeReserved {
     }
 
     my $circ_control_branch =
-      C4::Circulation::_GetCircControlBranch( $item->unblessed(), $borrower );
+      C4::Circulation::_GetCircControlBranch( $item, $borrower );
     my $branchitemrule =
-      C4::Circulation::GetBranchItemRule( $circ_control_branch, $item->itype );
+      C4::Circulation::GetBranchItemRule( $circ_control_branch, $item->{'itype'} );
 
     if ( $branchitemrule->{holdallowed} == 0 ) {
         return 'notReservable';
     }
 
     if (   $branchitemrule->{holdallowed} == 1
-        && $borrower->{branchcode} ne $item->homebranch )
+        && $borrower->{branchcode} ne $item->{'homebranch'} )
     {
         return 'cannotReserveFromOtherBranches';
-    }
-
-    # If reservecount is ok, we check item branch if IndependentBranches is ON
-    # and canreservefromotherbranches is OFF
-    if ( C4::Context->preference('IndependentBranches')
-        and !C4::Context->preference('canreservefromotherbranches') )
-    {
-        my $itembranch = $item->homebranch;
-        if ( $itembranch ne $borrower->{branchcode} ) {
-            return 'cannotReserveFromOtherBranches';
-        }
     }
 
     if ($branchcode_to) {
@@ -804,10 +811,10 @@ sub GetReserveStatus {
 
 =head2 CheckReserves
 
-  ($status, $reserve, $all_reserves) = &CheckReserves($itemnumber);
+  ($status, $reserve, $all_reserves) = &CheckReserves($item);
   ($status, $reserve, $all_reserves) = &CheckReserves(undef, $barcode);
-  ($status, $reserve, $all_reserves) = &CheckReserves($itemnumber,undef,$lookahead);
-  ($status, $reserve, $all_reserves) = &CheckReserves($itemnumber,undef, undef, $limit);
+  ($status, $reserve, $all_reserves) = &CheckReserves($item,undef,$lookahead);
+  ($status, $reserve, $all_reserves) = &CheckReserves($item,undef, undef, $limit);
 
 Find a book in the reserves.
 
@@ -829,6 +836,8 @@ C<$status> is either C<Waiting>, C<Reserved> (see above), or 0.
 C<$reserve> is the reserve item that matched. It is a
 reference-to-hash whose keys are mostly the fields of the reserves
 table in the Koha database.
+
+C<$item> can be either an itemnumber or a hashref
 
 =cut
 
@@ -869,7 +878,7 @@ sub CheckReserves {
 
     if ($item) {
         $sth = $dbh->prepare("$select WHERE itemnumber = ?");
-        $sth->execute($item);
+        $sth->execute(ref($item) eq 'HASH' ? $item->{'itemnumber'} : $item);
     }
     else {
         $sth = $dbh->prepare("$select WHERE barcode = ?");
@@ -887,7 +896,7 @@ sub CheckReserves {
     return if  ( $notforloan_per_item > 0 ) or $notforloan_per_itemtype;
 
     # Find this item in the reserves
-    my @reserves = _Findgroupreserve( $bibitem, $biblio, $itemnumber, $lookahead_days, $limit, $ignore_borrowers);
+    my @reserves = _Findgroupreserve( $bibitem, $biblio, $itemnumber, $lookahead_days, $limit, $ignore_borrowers, $item_homebranch, $item_holdingbranch);
 
     # $priority and $highest are used to find the most important item
     # in the list returned by &_Findgroupreserve. (The lower $priority,
@@ -897,20 +906,18 @@ sub CheckReserves {
     if (scalar @reserves) {
 
         my $priority = 10000000;
+        my $iteminfo = ref($item) eq 'HASH' ? $item : C4::Items::GetItem($itemnumber);
         foreach my $res (@reserves) {
-            my $issuing_rules = CheckIssuingRules($itemnumber, $res->{'borrowernumber'});
+            my $borrowerinfo = C4::Members::GetMember( borrowernumber => $res->{'borrowernumber'} );
+            my $issuing_rules = CheckIssuingRules($iteminfo, $borrowerinfo);
             return if (!defined $issuing_rules || $issuing_rules->reservesallowed == 0);
             if ( $res->{'itemnumber'} == $itemnumber && $res->{'priority'} == 0) {
                 return ( "Waiting", $res, \@reserves ); # Found it
             } else {
-                my $borrowerinfo;
-                my $iteminfo;
-
                 # See if this item is more important than what we've got so far
                 if ( ( $res->{'priority'} && $res->{'priority'} < $priority ) ) {
-                    $iteminfo ||= C4::Items::GetItem($itemnumber);
-                    next if $res->{itemtype} && $res->{itemtype} ne _get_itype( $iteminfo );
-                    $borrowerinfo ||= C4::Members::GetMember( borrowernumber => $res->{'borrowernumber'} );
+                    next if $res->{itemtype} && $res->{itemtype} ne $iteminfo->{'itype'};
+                    
                     my $branch = GetReservesControlBranch( $iteminfo, $borrowerinfo );
                     my $branchitemrule = C4::Circulation::GetBranchItemRule($branch,$iteminfo->{'itype'});
                     next if ($branchitemrule->{'holdallowed'} == 0);
@@ -928,7 +935,7 @@ sub CheckReserves {
     # If we get this far, then no exact match was found.
     # We return the most important (i.e. next) reservation.
     if ($highest) {
-        $highest->{'itemnumber'} = $item;
+        $highest->{'itemnumber'} = $itemnumber;
         return ( "Reserved", $highest, \@reserves );
     }
 
@@ -1771,7 +1778,7 @@ sub _FixPriority {
 
 =head2 _Findgroupreserve
 
-  @results = &_Findgroupreserve($biblioitemnumber, $biblionumber, $itemnumber, $lookahead, $limit, $ignore_borrowers);
+  @results = &_Findgroupreserve($biblioitemnumber, $biblionumber, $itemnumber, $lookahead, $limit, $ignore_borrowers, $item_homebranch, $item_holdingbranch);
 
 Looks for a holds-queue based item-specific match first, then for a holds-queue title-level match, returning the
 first match found.  If neither, then we look for non-holds-queue based holds.
@@ -1785,10 +1792,13 @@ C<biblioitemnumber>.
 =cut
 
 sub _Findgroupreserve {
-    my ( $bibitem, $biblio, $itemnumber, $lookahead, $limit, $ignore_borrowers) = @_;
+    my ( $bibitem, $biblio, $itemnumber, $lookahead, $limit, $ignore_borrowers, $item_homebranch, $item_holdingbranch) = @_;
     my $dbh   = C4::Context->dbh;
 
     my $LocalHoldsPriority = C4::Context->preference('LocalHoldsPriority');
+    my $LocalHoldsPriorityItemControl = C4::Context->preference('LocalHoldsPriorityItemControl');
+
+    my $itemlibrary = $LocalHoldsPriorityItemControl eq 'homebranch' ? $item_homebranch : $item_holdingbranch;
 
     # TODO: consolidate at least the SELECT portion of the first 2 queries to a common $select var.
     # check for exact targeted match
@@ -1823,7 +1833,7 @@ sub _Findgroupreserve {
     my @results;
     if ( my $data = $sth->fetchrow_hashref ) {
         if ($LocalHoldsPriority) {
-            my $checked = _check_local_holds_priority($itemnumber, $data->{borrowernumber}, $data->{branchcode});
+            my $checked = _check_local_holds_priority($itemlibrary, $data->{borrowernumber}, $data->{branchcode});
             if ($checked) {
                 push( @results, $data )
                     unless any{ $data->{borrowernumber} eq $_ } @$ignore_borrowers ;
@@ -1868,11 +1878,10 @@ sub _Findgroupreserve {
     @results = ();
     if ( my $data = $sth->fetchrow_hashref ) {
         if ($LocalHoldsPriority) {
-            my $checked = _check_local_holds_priority($itemnumber, $data->{borrowernumber}, $data->{branchcode});
+            my $checked = _check_local_holds_priority($itemlibrary, $data->{borrowernumber}, $data->{branchcode});
             if ($checked) {
                 push( @results, $data )
                     unless any{ $data->{borrowernumber} eq $_ } @$ignore_borrowers ;
-                last;
             }
         } else {
             push( @results, $data )
@@ -1907,37 +1916,37 @@ sub _Findgroupreserve {
     $sth->execute( $biblio, $itemnumber, $lookahead||0);
     @results = ();
     while ( my $data = $sth->fetchrow_hashref ) {
+        next if any{ $data->{borrowernumber} eq $_ } @$ignore_borrowers ;
         if ($LocalHoldsPriority) {
-            my $checked = _check_local_holds_priority($itemnumber, $data->{borrowernumber}, $data->{branchcode});
+            my $checked = _check_local_holds_priority($itemlibrary, $data->{borrowernumber}, $data->{branchcode});
             if ($checked) {
-                push( @results, $data )
-                    unless any{ $data->{borrowernumber} eq $_ } @$ignore_borrowers ;
+                push( @results, $data );
                 last;
             }
         } else {
-            push( @results, $data )
-              unless any{ $data->{borrowernumber} eq $_ } @$ignore_borrowers ;
+            push( @results, $data );
         }
     }
     return @results;
 }
 
 sub _check_local_holds_priority {
-    my ($itemnumber, $borrowernumber, $reservebranch) = @_;
+    my ($itemlibrary, $borrowernumber, $reservebranch) = @_;
 
     my $LocalHoldsPriorityPatronControl = C4::Context->preference('LocalHoldsPriorityPatronControl');
-    my $LocalHoldsPriorityItemControl = C4::Context->preference('LocalHoldsPriorityItemControl');
 
     my $patronlibrary;
-    my $itemlibrary;
 
     if($LocalHoldsPriorityPatronControl eq 'PickupLibrary' ) {
         $patronlibrary = $reservebranch;
     }
     if ($LocalHoldsPriorityPatronControl eq 'HomeLibrary' ) {
-       $patronlibrary = Koha::Patrons->find( $borrowernumber )->branchcode;
+        # Using raw SQL here since this is critical for good performance
+        my $sth = C4::Context->dbh->prepare('SELECT branchcode FROM borrowers WHERE borrowernumber = ?');
+        $sth->execute($borrowernumber);
+        ($patronlibrary) = $sth->fetchrow_array();
+        $sth->finish();
     }
-    $itemlibrary = Koha::Items->find( $itemnumber )->$LocalHoldsPriorityItemControl;
     if ($itemlibrary eq $patronlibrary) {
         return 1;
     } else {
@@ -2561,32 +2570,27 @@ sub GetHoldRule {
 
 =head2 CheckIssuingRules
 
-    my $issuing_rule = CheckIssuingRules( $itemnumber, $borrowernumber );
+    my $issuing_rule = CheckIssuingRules( $item, $borrower );
 
     Returns issuing rules for an item
 
 =cut
 
 sub CheckIssuingRules {
-    my ($itemnumber, $borrowernumber) = @_;
+    my ($item, $borrower) = @_;
 
-    my $patron = Koha::Patrons->find($borrowernumber);
-    my $item = Koha::Items->find($itemnumber);
-
-    return unless ( $patron && $item );
-
-    my $branch = GetReservesControlBranch( {homebranch => $item->homebranch}, {branchcode => $patron->branchcode} );
+    my $branch = GetReservesControlBranch( {homebranch => $item->{'homebranch'}}, {branchcode => $borrower->{'branchcode'}} );
 
     my $issuing_rule = Koha::IssuingRules->get_effective_issuing_rule(
-        {   categorycode => $patron->categorycode,
-            itemtype     => $item->effective_itemtype,
+        {   categorycode => $borrower->{'categorycode'},
+            itemtype     => $item->{'itype'},
             branchcode   => $branch,
-            ccode        => $item->ccode,
-            permanent_location => $item->permanent_location,
-            sub_location => $item->sub_location,
-            genre        => $item->genre,
-            circulation_level => $item->circulation_level,
-            reserve_level => $item->reserve_level,
+            ccode        => $item->{'ccode'},
+            permanent_location => $item->{'permanent_location'},
+            sub_location => $item->{'sub_location'},
+            genre        => $item->{'genre'},
+            circulation_level => $item->{'circulation_level'},
+            reserve_level => $item->{'reserve_level'},
         }
     );
 
